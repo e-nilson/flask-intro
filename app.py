@@ -31,19 +31,21 @@ def login_required(f):
 @login_required
 def home():
     # return "Hello, World!" # return a string
-
     # creates connection object for db connection
     # "g" is specific to flask and stores a temp object, like a db connection or currently logged in user
     g.db = connect_db()
+    cur = g.db.execute('select * from posts') # Query db
 
-    # Query db
-    cur = g.db.execute('select * from posts')
+    # refactored the function so it casts the results from the qry to
+    # the dictionary instead of assigning each key value pair manually
+    posts = []
+    for row in cur.fetchall():
+        posts.append(dict(title=row[0], description=row[1]))
 
-    # cast to dictionary
-    posts = [dict(title=row[0], description=row[1]) for row in cur.fetchall()]
+    # this serves the same purpose as the above function
+    # posts = [dict(title=row[0], description=row[1]) for row in cur.fetchall()] # cast to dictionary
 
-    # closes the db
-    g.db.close()
+    g.db.close() # closes the db
 
     return render_template("index.html", posts=posts) # render a template
 
